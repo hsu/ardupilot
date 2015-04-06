@@ -89,6 +89,7 @@ class IrisRos(Aircraft):
     def pos_cb(self, msg):
         self.velocity = Vector3(msg.vx, msg.vy, msg.vz)
         self.position = Vector3(msg.x, msg.y, msg.z)
+        self.yaw = msg.yaw
         self.have_new_pos = True
 
     def update(self, actuators):
