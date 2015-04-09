@@ -115,11 +115,36 @@ void Quaternion::from_euler(float roll, float pitch, float yaw)
     q4 = cr2*cp2*sy2 - sr2*sp2*cy2;
 }
 
+// create a quaternion from Euler angles
+void Quaternion::from_vector312(float roll ,float pitch, float yaw)
+{
+    float c3 = cosf(pitch);
+    float s3 = sinf(pitch);
+    float s2 = sinf(roll);
+    float c2 = cosf(roll);
+    float s1 = sinf(yaw);
+    float c1 = cosf(yaw);
+
+    Matrix3f m;
+    m.a.x = c1 * c3 - s1 * s2 * s3;
+    m.b.y = c1 * c2;
+    m.c.z = c3 * c2;
+    m.a.y = -c2*s1;
+    m.a.z = s3*c1 + c3*s2*s1;
+    m.b.x = c3*s1 + s3*s2*c1;
+    m.b.z = s1*s3 - s2*c1*c3;
+    m.c.x = -s3*c2;
+    m.c.y = s2;
+
+    from_rotation_matrix(m);
+}
+
 void Quaternion::from_axis_angle(Vector3f v) {
     float theta = v.length();
     if(theta == 0.0f) {
         q1 = 1.0f;
         q2=q3=q4=0.0f;
+        return;
     }
     v /= theta;
     from_axis_angle(v,theta);
@@ -209,6 +234,21 @@ void Quaternion::to_euler(float &roll, float &pitch, float &yaw) const
     yaw = atan2f(2.0f*(q1*q4 + q2*q3), 1 - 2.0f*(q3*q3 + q4*q4));
 }
 
+// create eulers from a quaternion
+void Quaternion::to_vector312(float &roll, float &pitch, float &yaw) const
+{    
+    Matrix3f m;
+    rotation_matrix(m);
+    float T21 = m.a.y;
+    float T22 = m.b.y;
+    float T23 = m.c.y;
+    float T13 = m.c.x;
+    float T33 = m.c.z;
+    yaw = atan2f(-T21, T22);
+    roll = safe_asin(T23);
+    pitch = atan2f(-T13, T33);
+}
+
 float Quaternion::length(void) const
 {
     return sqrtf(sq(q1) + sq(q2) + sq(q3) + sq(q4));
@@ -232,12 +272,12 @@ void Quaternion::normalize(void)
     }    
 }
 
-Quaternion Quaternion::operator*(const Quaternion &v) {
+Quaternion Quaternion::operator*(const Quaternion &v) const {
     Quaternion ret;
-    float &w1 = q1;
-    float &x1 = q2;
-    float &y1 = q3;
-    float &z1 = q4;
+    const float &w1 = q1;
+    const float &x1 = q2;
+    const float &y1 = q3;
+    const float &z1 = q4;
 
     float w2 = v.q1;
     float x2 = v.q2;
@@ -271,12 +311,12 @@ Quaternion &Quaternion::operator*=(const Quaternion &v) {
     return *this;
 }
 
-Quaternion Quaternion::operator/(const Quaternion &v) {
+Quaternion Quaternion::operator/(const Quaternion &v) const {
     Quaternion ret;
-    float &quat0 = q1;
-    float &quat1 = q2;
-    float &quat2 = q3;
-    float &quat3 = q4;
+    const float &quat0 = q1;
+    const float &quat1 = q2;
+    const float &quat2 = q3;
+    const float &quat3 = q4;
 
     float rquat0 = v.q1;
     float rquat1 = v.q2;
