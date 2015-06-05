@@ -827,7 +827,7 @@ AP_InertialSensor::_init_gyro()
 
         memset(diff_norm, 0, sizeof(diff_norm));
 
-        hal.console->print_P(PSTR("-"));
+        hal.console->print_P(PSTR("*"));
 
         for (uint8_t k=0; k<num_gyros; k++) {
             gyro_sum[k].zero();
@@ -842,11 +842,7 @@ AP_InertialSensor::_init_gyro()
         }
 
         Vector3f accel_diff = get_accel(0) - accel_start;
-        hal.console->printf("accel start[%6.4f, %6.4f, %6.4f], cur [%6.4f, %6.4f, %6.4f], L[%6.4f]\n",
-          accel_start[0], accel_start[1], accel_start[2],
-          get_accel(0)[0], get_accel(0)[1], get_accel(0)[2],
-          accel_diff.length());
-        if (accel_diff.length() > 2.5f) {
+        if (accel_diff.length() > 0.2f) {
             // the accelerometers changed during the gyro sum. Skip
             // this sample. This copes with doing gyro cal on a
             // steadily moving platform. The value 0.2 corresponds
@@ -861,12 +857,10 @@ AP_InertialSensor::_init_gyro()
         }
 
         for (uint8_t k=0; k<num_gyros; k++) {
-            hal.console->printf("gyro diff [%6.4f] [%6.4f]\n", gyro_diff[k].length(), ToRad(1.0f));
-
             if (j == 0) {
                 best_diff[k] = diff_norm[k];
                 best_avg[k] = gyro_avg[k];
-            } else if (gyro_diff[k].length() < ToRad(1.0f)) {
+            } else if (gyro_diff[k].length() < ToRad(0.1f)) {
                 // we want the average to be within 0.1 bit, which is 0.04 degrees/s
                 last_average[k] = (gyro_avg[k] * 0.5f) + (last_average[k] * 0.5f);
                 if (!converged[k] || last_average[k].length() < new_gyro_offset[k].length()) {
