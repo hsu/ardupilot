@@ -47,23 +47,11 @@ Gazebo::Gazebo(const char *home_str, const char *frame_str) :
 */
 void Gazebo::send_servos(const struct sitl_input &input)
 {
-    fprintf(stdout, "send\n");
-    float swash1 = (input.servos[0]-1000) / 1000.0f;
-    float swash2 = (input.servos[1]-1000) / 1000.0f;
-    float swash3 = (input.servos[2]-1000) / 1000.0f;
-    float tail_rotor = (input.servos[3]-1000) / 1000.0f;
-    float rsc = (input.servos[7]-1000) / 1000.0f;
-
-    float col_pitch = (swash1+swash2+swash3)/3.0 - 0.5f;
-    float roll_rate = (swash1 - swash2)/2;
-    float pitch_rate = -((swash1 + swash2)/2.0 - swash3)/2;
-    float yaw_rate = -(tail_rotor - 0.5);
-    
     servo_packet pkt;
-    pkt.motor_speed[0] = 100;
-    pkt.motor_speed[1] = 100;
-    pkt.motor_speed[2] = 100;
-    pkt.motor_speed[3] = 100;
+    pkt.motor_speed[0] = (input.servos[0]-1000) / 1000.0f;
+    pkt.motor_speed[1] = (input.servos[1]-1000) / 1000.0f;
+    pkt.motor_speed[2] = (input.servos[2]-1000) / 1000.0f;
+    pkt.motor_speed[3] = (input.servos[3]-1000) / 1000.0f;
     sock.sendto(&pkt, sizeof(pkt), "127.0.0.1", 9002);
 }
 
@@ -73,7 +61,6 @@ void Gazebo::send_servos(const struct sitl_input &input)
  */
 void Gazebo::recv_fdm(const struct sitl_input &input)
 {
-    fprintf(stdout, "recv\n");
     fdm_packet pkt;
 
     /*
@@ -84,14 +71,28 @@ void Gazebo::recv_fdm(const struct sitl_input &input)
         send_servos(input);
     }
 
-    double t = pkt.timestamp;
-    double anguler_velocity = pkt.imu_angular_velocity_rpy[2];
-    double linear_acceleration = pkt.imu_linear_acceleration_xyz[2];
-    double orientation_quat = pkt.imu_orientation_quat[3];
-    double velocity_rpy = pkt.velocity_rpy[2];
-    double position_xyz = pkt.position_xyz[2];
+    accel_body = Vector3f(pkt.imu_linear_acceleration_xyz[0],
+                          pkt.imu_linear_acceleration_xyz[1],
+                          pkt.imu_linear_acceleration_xyz[2]);
+    gyro = Vector3f(pkt.imu_angular_velocity_rpy[0],
+                    pkt.imu_angular_velocity_rpy[1],
+                    pkt.imu_angular_velocity_rpy[2]);
+    /// assume velocity here is in the world frame
+    double speedN = pkt.velocity_xyz[0];
+    double speedE = pkt.velocity_xyz[1];
+    double speedD = pkt.velocity_xyz[2];
+    velocity_ef = Vector3f(speedN, speedE, speedD);
 
-    // dcm.from_euler(pkt.roll, pkt.pitch, pkt.yaw);
+    // two fields below are not used
+    // double orientation_quat = pkt.imu_orientation_quat[3];
+    // double position_xyz = pkt.position_xyz[2];
+
+    Quaternion quat(pkt.imu_orientation_quat[0],
+                    pkt.imu_orientation_quat[1],
+                    pkt.imu_orientation_quat[2],
+                    pkt.imu_orientation_quat[3]);
+
+    quat.rotation_matrix(dcm);
 
     // auto-adjust to simulation frame rate
     double deltat = pkt.timestamp - last_timestamp;
@@ -108,7 +109,6 @@ void Gazebo::recv_fdm(const struct sitl_input &input)
  */
 void Gazebo::update(const struct sitl_input &input)
 {
-    fprintf(stdout, "test\n");
     send_servos(input);
     recv_fdm(input);
     update_position();

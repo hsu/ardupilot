@@ -22,7 +22,6 @@
 
 #include "SIM_Aircraft.h"
 #include <utility/Socket.h>
-#include <stdio.h>
 
 /*
   Gazebo simulator
@@ -37,7 +36,6 @@ public:
 
     /* static object creator */
     static Aircraft *create(const char *home_str, const char *frame_str) {
-        fprintf(stdout, "creating gazebo\n");
         return new Gazebo(home_str, frame_str);
     }
 
@@ -57,7 +55,7 @@ private:
       double imu_angular_velocity_rpy[3];
       double imu_linear_acceleration_xyz[3];
       double imu_orientation_quat[3];
-      double velocity_rpy[3];
+      double velocity_xyz[3];
       double position_xyz[3];
     };
 
