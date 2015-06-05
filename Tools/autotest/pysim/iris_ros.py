@@ -84,8 +84,6 @@ class IrisRos(Aircraft):
                                msg.orientation.x,
                                -msg.orientation.y,
                                -msg.orientation.z)
-        # (roll, pitch, yaw) = self.dcm.to_euler()
-        # self.yaw = yaw
         self.have_new_imu = True
         
     def pos_cb(self, msg):
