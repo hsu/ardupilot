@@ -83,9 +83,9 @@ void Gazebo::recv_fdm(const struct sitl_input &input)
     double speedD = pkt.velocity_xyz[2];
     velocity_ef = Vector3f(speedN, speedE, speedD);
 
-    // two fields below are not used
-    // double orientation_quat = pkt.imu_orientation_quat[3];
-    // double position_xyz = pkt.position_xyz[2];
+    position = Vector3f(pkt.position_xyz[0],
+                        pkt.position_xyz[1],
+                        pkt.position_xyz[2]);
 
     Quaternion quat(pkt.imu_orientation_quat[0],
                     pkt.imu_orientation_quat[1],
@@ -102,6 +102,17 @@ void Gazebo::recv_fdm(const struct sitl_input &input)
         adjust_frame_time(1.0/deltat);
     }
     last_timestamp = pkt.timestamp;
+
+    /* copied below from iris_ros.py */
+    /*
+    bearing = to_degrees(atan2(position.y, position.x));
+    distance = math.sqrt(self.position.x**2 + self.position.y**2)
+    (self.latitude, self.longitude) = util.gps_newpos(
+      self.home_latitude, self.home_longitude, bearing, distance)
+    self.altitude  = self.home_altitude - self.position.z
+    velocity_body = self.dcm.transposed() * self.velocity
+    self.accelerometer = self.accel_body.copy()
+    */
 }
 
 /*
