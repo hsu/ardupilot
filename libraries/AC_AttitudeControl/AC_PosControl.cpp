@@ -46,6 +46,7 @@ AC_PosControl::AC_PosControl(const AP_AHRS& ahrs, const AP_InertialNav& inav,
     _speed_up_cms(POSCONTROL_SPEED_UP),
     _speed_cms(POSCONTROL_SPEED),
     _accel_z_cms(POSCONTROL_ACCEL_Z),
+    _accel_last_z_cms(0.0f),
     _accel_cms(POSCONTROL_ACCEL_XY),
     _leash(POSCONTROL_LEASH_LENGTH_MIN),
     _leash_down_z(POSCONTROL_LEASH_LENGTH_MIN),
@@ -661,7 +662,7 @@ void AC_PosControl::update_vel_controller_xyz(float ekfNavVelGainScaler)
     accel_to_lean_angles(dt, ekfNavVelGainScaler);
 
     // update altitude target
-    set_alt_target_from_climb_rate(_vel_desired.z, dt);
+    set_alt_target_from_climb_rate(_vel_desired.z, dt, false);
 
     // run z-axis position controller
     update_z_controller();

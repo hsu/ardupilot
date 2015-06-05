@@ -228,7 +228,7 @@ private:
         uint8_t rc_map_cmd;
         uint8_t rc_map_fc_roll;
         uint8_t rc_map_fc_pitch;
-	
+
         uint8_t rc_mix_fc_roll;
         uint8_t rc_mix_fc_pitch;
 
@@ -294,30 +294,30 @@ private:
     } _buffer,_current_parameters;
 
     AP_HAL::UARTDriver *_port;
-    bool _initialised;
+    bool _initialised : 1;
 
     // result of the get_boardinfo
     uint8_t _board_version;
     float _current_firmware_version;
     uint8_t _firmware_beta_version;
-    bool _gimbal_3axis ;
-    bool _gimbal_bat_monitoring ;
+    bool _gimbal_3axis : 1;
+    bool _gimbal_bat_monitoring : 1;
 
     // keep the last _current_angle values
     Vector3f _current_angle;
 
     // CMD_READ_PARAMS has been called once
-    bool _param_read_once;
+    bool _param_read_once : 1;
 
     // Serial Protocol Variables
-    uint8_t _checksum ;
-    uint8_t _step ;
+    uint8_t _checksum;
+    uint8_t _step;
     uint8_t _command_id;
     uint8_t _payload_length;
     uint8_t _payload_counter;
 
     // confirmed that last command was ok
-    bool _last_command_confirmed;
+    bool _last_command_confirmed : 1;
 };
 
 #endif
