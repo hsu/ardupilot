@@ -71,28 +71,31 @@ void Gazebo::recv_fdm(const struct sitl_input &input)
         send_servos(input);
     }
 
+    // get imu stuff
     accel_body = Vector3f(pkt.imu_linear_acceleration_xyz[0],
                           pkt.imu_linear_acceleration_xyz[1],
                           pkt.imu_linear_acceleration_xyz[2]);
+
     gyro = Vector3f(pkt.imu_angular_velocity_rpy[0],
                     pkt.imu_angular_velocity_rpy[1],
                     pkt.imu_angular_velocity_rpy[2]);
-    /// assume velocity here is in the world frame
-    double speedN = pkt.velocity_xyz[0];
-    double speedE = pkt.velocity_xyz[1];
-    double speedD = pkt.velocity_xyz[2];
+
+    // compute dcm from imu orientation
+    Quaternion quat(pkt.imu_orientation_quat[0],
+                    pkt.imu_orientation_quat[1],
+                    pkt.imu_orientation_quat[2],
+                    pkt.imu_orientation_quat[3]);
+    quat.rotation_matrix(dcm);
+
+    double speedN =  pkt.velocity_xyz[0];
+    double speedE =  pkt.velocity_xyz[1];
+    double speedD =  pkt.velocity_xyz[2];
     velocity_ef = Vector3f(speedN, speedE, speedD);
 
     position = Vector3f(pkt.position_xyz[0],
                         pkt.position_xyz[1],
                         pkt.position_xyz[2]);
 
-    Quaternion quat(pkt.imu_orientation_quat[0],
-                    pkt.imu_orientation_quat[1],
-                    pkt.imu_orientation_quat[2],
-                    pkt.imu_orientation_quat[3]);
-
-    quat.rotation_matrix(dcm);
 
     // auto-adjust to simulation frame rate
     double deltat = pkt.timestamp - last_timestamp;
