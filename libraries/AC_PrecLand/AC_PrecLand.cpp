@@ -48,7 +48,7 @@ const AP_Param::GroupInfo AC_PrecLand::var_info[] = {
     // @Description: Precision Land Alt Threshold in cm
     // @Values: 1
     // @User: Advanced
-    AP_GROUPINFO("ALT_THR_CM",    5, AC_PrecLand, _alt_thr_cm, 50.0),
+    AP_GROUPINFO("ALT_THR_CM",    5, AC_PrecLand, _alt_thr_cm, 0.0),
 
     AP_GROUPEND
 };
@@ -166,10 +166,14 @@ void AC_PrecLand::calc_angles_and_pos(const Vector3f& target_vec_unit_body, floa
 {
     // rotate into NED frame
     Vector3f target_vec_unit_ned;
-    // if (_has_gimbal)
-    //   target_vec_unit_ned = target_vec_unit_body;
-    // else
+    if (_has_gimbal)
+    {
       target_vec_unit_ned = _ahrs.get_rotation_body_to_ned()*target_vec_unit_body;
+    }
+    else
+    {
+      target_vec_unit_ned = _ahrs.get_rotation_body_to_ned()*target_vec_unit_body;
+    }
 
     // extract the angles to target (logging only)
     _angle_to_target.x = atan2f(-target_vec_unit_body.y, target_vec_unit_body.z);
@@ -179,10 +183,10 @@ void AC_PrecLand::calc_angles_and_pos(const Vector3f& target_vec_unit_body, floa
 
     if (target_vec_unit_ned.z > 0.0f) {
         // get current altitude (constrained to be positive)
-        float alt = MAX(alt_above_terrain_cm, 0.0f);
+        float alt = MAX(alt_above_terrain_cm, _alt_thr_cm);
         float dist = alt/target_vec_unit_ned.z;
-        _target_pos_rel.x = target_vec_unit_ned.x*dist;
-        _target_pos_rel.y = target_vec_unit_ned.y*dist;
+        _target_pos_rel.x = _p_gain_x*target_vec_unit_ned.x*dist;
+        _target_pos_rel.y = _p_gain_y*target_vec_unit_ned.y*dist;
         _target_pos_rel.z = alt;  // not used
         _target_pos = _inav.get_position()+_target_pos_rel;
 
