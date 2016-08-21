@@ -95,6 +95,10 @@ private:
     // parameters
     AP_Int8                     _enabled;           // enabled/disabled and behaviour
     AP_Int8                     _type;              // precision landing controller type
+    AP_Int8                     _has_gimbal;              // precision landing controller type
+    AP_Float                    _p_gain_x;              // precision landing controller type
+    AP_Float                    _p_gain_y;              // precision landing controller type
+    AP_Float                    _alt_thr_cm;              // precision landing controller type
 
     uint32_t                    _last_update_ms;      // epoch time in millisecond when update is called
     uint32_t                    _last_backend_los_meas_ms;
