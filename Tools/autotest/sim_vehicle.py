@@ -329,7 +329,7 @@ _options_for_frame = {
         "waf_target": "bin/ardurover",
         "default_params_filename": "default_params/rover-skid.parm",
     },
-    # SIM
+    # SIM (use GazeboIris in place of Gazebo)
     "gazebo-iris": {
         "waf_target": "bin/arducopter-quad",
         "default_params_filename": "default_params/gazebo-iris.parm",
