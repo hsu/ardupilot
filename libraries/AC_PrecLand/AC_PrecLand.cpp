@@ -151,7 +151,9 @@ void AC_PrecLand::update(float rangefinder_alt_cm, bool rangefinder_alt_valid)
 
             bool target_vec_valid = target_vec_unit_ned.z > 0.0f;
 
-            if (target_vec_valid && rangefinder_alt_valid && rangefinder_alt_cm > 0.0f) {
+            // hal.console->printf("  debut %d %d %d\n", target_vec_valid, rangefinder_alt_valid, rangefinder_alt_cm);
+            // if (target_vec_valid && rangefinder_alt_valid && rangefinder_alt_cm > 0.0f) {
+            if (target_vec_valid && /* rangefinder_alt_valid &&*/ rangefinder_alt_cm > 0.0f) {
                 float alt = MAX(rangefinder_alt_cm*0.01f, 0.0f);
                 float dist = alt/target_vec_unit_ned.z;
                 Vector3f targetPosRelMeasNED = Vector3f(target_vec_unit_ned.x*dist, target_vec_unit_ned.y*dist, alt);
@@ -186,6 +188,7 @@ void AC_PrecLand::update(float rangefinder_alt_cm, bool rangefinder_alt_valid)
 
 bool AC_PrecLand::target_acquired() const
 {
+    // hal.console->printf("  acq  %d %d\n", AP_HAL::millis(), _last_update_ms);
     return (AP_HAL::millis()-_last_update_ms) < 2000;
 }
 

@@ -72,8 +72,9 @@ bool AP_IRLock_SITL::update()
 
     for (uint16_t i=0; i<_num_targets; ++i) {
       // fprintf(stderr, "sitl %d %d\n", i, _num_targets);
+      // hal.console->printf("  s  %d %d\n", s, sizeof(irlock_packet));
+      // hal.console->printf("  t  %d %d\n", pkt.timestamp, _last_timestamp);
       if (s == sizeof(irlock_packet) && pkt.timestamp >_last_timestamp) {
-          // fprintf(stderr, "     posx %f posy %f sizex %f sizey %f\n", pkt.pos_x, pkt.pos_y, pkt.size_x, pkt.size_y);
           _target_info[i].timestamp = pkt.timestamp;
           _target_info[i].pos_x = pkt.pos_x;
           _target_info[i].pos_y = pkt.pos_y;
@@ -81,6 +82,7 @@ bool AP_IRLock_SITL::update()
           _target_info[i].size_y = pkt.size_y;
           _last_timestamp = pkt.timestamp;
           _last_update_ms = AP_HAL::millis();
+          // hal.console->printf("     posx %f posy %f sizex %f sizey %f t %d\n", pkt.pos_x, pkt.pos_y, pkt.size_x, pkt.size_y, _last_update_ms);
       }
     }
 

@@ -50,6 +50,27 @@ void Copter::loiter_run()
     pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
     pos_control.set_accel_z(g.pilot_accel_z);
 
+#if PRECISION_LANDING == ENABLED
+    bool doing_precision_landing = !ap.land_repo_active && precland.target_acquired();
+    // GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "test2 %d %d %d",!ap.land_repo_active, precland.target_acquired(), (unsigned)doing_precision_landing);
+    // run precision landing
+    if (doing_precision_landing) {
+        Vector2f target_pos, target_vel_rel;
+        if (!precland.get_target_position_cm(target_pos)) {
+            target_pos.x = inertial_nav.get_position().x;
+            target_pos.y = inertial_nav.get_position().y;
+        }
+        if (!precland.get_target_velocity_relative_cms(target_vel_rel)) {
+            target_vel_rel.x = -inertial_nav.get_velocity().x;
+            target_vel_rel.y = -inertial_nav.get_velocity().y;
+        }
+        pos_control.set_xy_target(target_pos.x, target_pos.y);
+        pos_control.override_vehicle_velocity_xy(-target_vel_rel);
+    }
+#else
+    bool doing_precision_landing = false;
+#endif
+
     // process pilot inputs unless we are in radio failsafe
     if (!failsafe.radio) {
         // apply SIMPLE mode transform to pilot inputs

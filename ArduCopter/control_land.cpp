@@ -253,6 +253,7 @@ void Copter::land_run_horizontal_control()
 
 #if PRECISION_LANDING == ENABLED
     bool doing_precision_landing = !ap.land_repo_active && precland.target_acquired();
+    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "test2 %d %d %d",!ap.land_repo_active, precland.target_acquired(), (unsigned)doing_precision_landing);
     // run precision landing
     if (doing_precision_landing) {
         Vector2f target_pos, target_vel_rel;
