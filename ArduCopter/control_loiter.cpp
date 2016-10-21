@@ -48,6 +48,20 @@ void Copter::loiter_run()
     pos_control.set_speed_z(-g.pilot_velocity_z_max, g.pilot_velocity_z_max);
     pos_control.set_accel_z(g.pilot_accel_z);
 
+#if PRECISION_LANDING == ENABLED
+    bool doing_precision_landing = !ap.land_repo_active && precland.target_acquired();
+    // run precision landing
+    if (doing_precision_landing && precland_last_update_ms != precland.last_update_ms()) {
+        Vector3f target_pos;
+        precland.get_target_position(target_pos);
+        pos_control.set_xy_target(target_pos.x, target_pos.y);
+        pos_control.freeze_ff_xy();
+        precland_last_update_ms = precland.last_update_ms();
+    }
+#else
+    bool doing_precision_landing = false;
+#endif
+    
     // process pilot inputs unless we are in radio failsafe
     if (!failsafe.radio) {
         // apply SIMPLE mode transform to pilot inputs
