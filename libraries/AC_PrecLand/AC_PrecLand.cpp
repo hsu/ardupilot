@@ -20,7 +20,14 @@ const AP_Param::GroupInfo AC_PrecLand::var_info[] = {
     // @Description: Precision Land Type
     // @Values: 0:None, 1:CompanionComputer, 2:IRLock
     // @User: Advanced
-    AP_GROUPINFO("TYPE",    1, AC_PrecLand, _type, 0),
+    AP_GROUPINFO("TYPE",    1, AC_PrecLand, _type, 2),
+
+    // @Param: ALT_THRESH
+    // @DisplayName: Precision Land Type
+    // @Description: Precision Land Type
+    // @Values: min alt used in CM
+    // @User: Advanced
+    AP_GROUPINFO("ALT_THRESH",    2, AC_PrecLand, _alt_thresh, 50.0f),
 
     AP_GROUPEND
 };
@@ -147,7 +154,7 @@ void AC_PrecLand::calc_angles_and_pos(const Vector3f& target_vec_unit_body, floa
 
     if (target_vec_unit_ned.z > 0.0f) {
         // get current altitude (constrained to be positive)
-        float alt = MAX(alt_above_terrain_cm, 0.0f);
+        float alt = MAX(alt_above_terrain_cm, _alt_thresh);
         float dist = alt/target_vec_unit_ned.z;
         _target_pos_rel.x = target_vec_unit_ned.x*dist;
         _target_pos_rel.y = target_vec_unit_ned.y*dist;
