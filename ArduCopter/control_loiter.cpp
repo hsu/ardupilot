@@ -51,12 +51,18 @@ void Copter::loiter_run()
 #if PRECISION_LANDING == ENABLED
     bool doing_precision_landing = !ap.land_repo_active && precland.target_acquired();
     // run precision landing
-    if (doing_precision_landing && precland_last_update_ms != precland.last_update_ms()) {
-        Vector3f target_pos;
-        precland.get_target_position(target_pos);
+    if (doing_precision_landing) {
+        Vector2f target_pos, target_vel_rel;
+        if (!precland.get_target_position_cm(target_pos)) {
+            target_pos.x = inertial_nav.get_position().x;
+            target_pos.y = inertial_nav.get_position().y;
+        }
+        if (!precland.get_target_velocity_relative_cms(target_vel_rel)) {
+            target_vel_rel.x = -inertial_nav.get_velocity().x;
+            target_vel_rel.y = -inertial_nav.get_velocity().y;
+        }
         pos_control.set_xy_target(target_pos.x, target_pos.y);
-        pos_control.freeze_ff_xy();
-        precland_last_update_ms = precland.last_update_ms();
+        pos_control.override_vehicle_velocity_xy(-target_vel_rel);
     }
 #else
     bool doing_precision_landing = false;

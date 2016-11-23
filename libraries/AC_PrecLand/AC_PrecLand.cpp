@@ -48,13 +48,6 @@ const AP_Param::GroupInfo AC_PrecLand::var_info[] = {
     // @Units: Centimeters
     AP_GROUPINFO("LAND_OFS_Y",    4, AC_PrecLand, _land_ofs_cm_y, 0),
 
-    // @Param: ALT_THRESH
-    // @DisplayName: Precision Land Type
-    // @Description: Precision Land Type
-    // @Values: min alt used in CM
-    // @User: Advanced
-    AP_GROUPINFO("ALT_THRESH",    5, AC_PrecLand, _alt_thresh, 25.0f),
-
     AP_GROUPEND
 };
 
@@ -223,26 +216,10 @@ bool AC_PrecLand::get_target_position_relative_cm(Vector2f& ret) const
 
 bool AC_PrecLand::get_target_velocity_relative_cms(Vector2f& ret) const
 {
-    // rotate into NED frame
-    Vector3f target_vec_unit_ned = _ahrs.get_rotation_body_to_ned()*target_vec_unit_body;
-
-    // extract the angles to target (logging only)
-    _angle_to_target.x = atan2f(-target_vec_unit_body.y, target_vec_unit_body.z);
-    _angle_to_target.y = atan2f( target_vec_unit_body.x, target_vec_unit_body.z);
-    _ef_angle_to_target.x = atan2f(-target_vec_unit_ned.y, target_vec_unit_ned.z);
-    _ef_angle_to_target.y = atan2f( target_vec_unit_ned.x, target_vec_unit_ned.z);
-
-    if (target_vec_unit_ned.z > 0.0f) {
-        // get current altitude (constrained to be positive)
-        float alt = MAX(alt_above_terrain_cm, _alt_thresh);
-        float dist = alt/target_vec_unit_ned.z;
-        _target_pos_rel.x = target_vec_unit_ned.x*dist;
-        _target_pos_rel.y = target_vec_unit_ned.y*dist;
-        _target_pos_rel.z = alt;  // not used
-        _target_pos = _inav.get_position()+_target_pos_rel;
-
-        _last_update_ms = AP_HAL::millis();
+    if (!target_acquired()) {
+        return false;
     }
+
     ret.x = _ekf_x.getVel()*100.0f;
     ret.y = _ekf_y.getVel()*100.0f;
     return true;
