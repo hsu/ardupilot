@@ -49,7 +49,7 @@ void Copter::loiter_run()
     pos_control.set_accel_z(g.pilot_accel_z);
 
 #if PRECISION_LANDING == ENABLED
-    bool doing_precision_landing = !ap.land_repo_active && precland.target_acquired();
+    bool doing_precision_landing = precland.target_acquired();
     // run precision landing
     if (doing_precision_landing) {
         Vector2f target_pos, target_vel_rel;
