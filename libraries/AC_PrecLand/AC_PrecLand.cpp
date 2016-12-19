@@ -194,7 +194,16 @@ bool AC_PrecLand::get_target_position_cm(Vector2f& ret) const
         return false;
     }
 
+    // rotate into NED frame
+#define GIMBAL
+#ifdef GIMBAL
+    float roll, pitch, yaw;
+    _ahrs.get_rotation_body_to_ned().to_euler(&roll, &pitch, &yaw);
+    Matrix3f rot; rot.from_euler(0, 0, yaw);
+    Vector3f land_ofs_ned_cm = rot * Vector3f(_land_ofs_cm_x,_land_ofs_cm_y,0);
+#else
     Vector3f land_ofs_ned_cm = _ahrs.get_rotation_body_to_ned() * Vector3f(_land_ofs_cm_x,_land_ofs_cm_y,0);
+#endif
 
     ret.x = _ekf_x.getPos()*100.0f + _inav.get_position().x + land_ofs_ned_cm.x;
     ret.y = _ekf_y.getPos()*100.0f + _inav.get_position().y + land_ofs_ned_cm.y;
