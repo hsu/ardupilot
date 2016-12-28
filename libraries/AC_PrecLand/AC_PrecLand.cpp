@@ -232,6 +232,12 @@ bool AC_PrecLand::target_acquired() const
     return (AP_HAL::millis()-_last_update_ms) < 2000;
 }
 
+bool AC_PrecLand::target_acquired_fast() const
+{
+    // allow for shorter 500ms dropoff
+    return (AP_HAL::millis()-_last_update_ms) < 500;
+}
+
 bool AC_PrecLand::get_target_position_cm(Vector2f& ret) const
 {
     if (!target_acquired()) {

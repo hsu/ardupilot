@@ -63,6 +63,9 @@ public:
     // returns true when the landing target has been detected
     bool target_acquired() const;
 
+    // returns true when the landing target has been detected
+    bool target_acquired_fast() const;
+
     // process a LANDING_TARGET mavlink message
     void handle_msg(mavlink_message_t* msg);
 
