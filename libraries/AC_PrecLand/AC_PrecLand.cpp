@@ -66,6 +66,15 @@ const AP_Param::GroupInfo AC_PrecLand::var_info[] = {
     // @Units: Bool
     AP_GROUPINFO("REQ_RNGFNDR",    6, AC_PrecLand, _require_rangefinder, 0),
 
+    // @Param: ALT_THRESH_CM
+    // @DisplayName: altitude threshold
+    // @Description: altitude threshold
+    // @Range: 0 1000
+    // @Increment: 1
+    // @User: Advanced
+    // @Units: Centimeters
+    // AP_GROUPINFO("ALT_THRESH_CM",    7, AC_PrecLand, _alt_thresh_cm, 0),
+
     AP_GROUPEND
 };
 
@@ -85,6 +94,9 @@ AC_PrecLand::AC_PrecLand(const AP_AHRS& ahrs, const AP_InertialNav& inav) :
 
     // other initialisation
     _backend_state.healthy = false;
+
+    // init alt
+    _alt_thresh_cm = 0.0;
 }
 
 
@@ -179,8 +191,10 @@ void AC_PrecLand::update(float rangefinder_alt_cm, bool rangefinder_alt_valid)
             bool target_vec_valid = target_vec_unit_ned.z > 0.0f;
 
             if (target_vec_valid &&
-                (rangefinder_alt_valid || !_require_rangefinder) &&
-                rangefinder_alt_cm > 0.0f) {
+                (rangefinder_alt_valid || !_require_rangefinder)) {
+                if (rangefinder_alt_cm < _alt_thresh_cm) {
+                  rangefinder_alt_cm = _alt_thresh_cm;
+                }
                 float alt = MAX(rangefinder_alt_cm*0.01f, 0.0f);
                 float dist = alt/target_vec_unit_ned.z;
                 Vector3f targetPosRelMeasNED = Vector3f(target_vec_unit_ned.x*dist, target_vec_unit_ned.y*dist, alt);

@@ -287,7 +287,8 @@ NOINLINE void Copter::send_extended_status1(mavlink_channel_t chan)
         battery_remaining,      // in %
         0, // comm drops %,
         0, // comm drops in pkts,
-        0, 0, 0, 0);
+        0, 0, 0,
+        precland.target_acquired()); // hijack for PL tracking status
 
 #if FRSKY_TELEM_ENABLED == ENABLED
     // give mask of error flags to Frsky_Telemetry

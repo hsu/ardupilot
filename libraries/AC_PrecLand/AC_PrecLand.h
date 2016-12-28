@@ -88,6 +88,7 @@ private:
     AP_Float                    _land_ofs_cm_y;     // Desired landing position of the camera right of the target in vehicle body frame
     AP_Int8                     _gimbal;            // using gimbal mounted camera?
     AP_Int8                     _require_rangefinder; // require rangefinder to track?
+    AP_Float                    _alt_thresh_cm;     // minimum alt used for correction calculation
 
     uint32_t                    _last_update_ms;      // epoch time in millisecond when update is called
     uint32_t                    _last_backend_los_meas_ms;
